@@ -105,5 +105,16 @@ year={2021}}
 ### Citation
 
 ```
-@inproceedings
+@inproceedings{dou-etal-2022-decorrelate,
+    title = "Decorrelate Irrelevant, Purify Relevant: Overcome Textual Spurious Correlations from a Feature Perspective",
+    author = "Dou, Shihan and Zheng, Rui and Wu, Ting and Gao, Songyang and Zhang, Qi and Wu, Yueming and Huang, Xuanjing",
+    booktitle = "Proceedings of the 29th International Conference on Computational Linguistics",
+    month = oct,
+    year = "2022",
+    address = "Gyeongju, Republic of Korea",
+    publisher = "International Committee on Computational Linguistics",
+    url = "https://aclanthology.org/2022.coling-1.199",
+    pages = "2278--2287",
+}
+
 ```
