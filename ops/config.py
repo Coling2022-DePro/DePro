@@ -37,6 +37,10 @@ parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     dest='weight_decay')
 
 
+parser.add_argument('--beta', default=0.0, type=float,
+                    help='hyperparam of Info upper bound')
+
+
 parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',

@@ -40,7 +40,7 @@ def validate(val_loader, model, criterion, epoch=0, test=True, args=None, tensor
             segment_ids = segment_ids.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
 
-            output, cfeatures = model(input_ids, attention_masks, segment_ids)
+            output, cfeatures, hidden_states = model(input_ids, attention_masks, segment_ids)
             loss = criterion(output, target)
 
             acc1, acc5 = accuracy(output, target, topk=(1, 1), args=args, datasetname=datasetname)
@@ -56,6 +56,7 @@ def validate(val_loader, model, criterion, epoch=0, test=True, args=None, tensor
                 progress.write_log(i, args.log_path)
 
         print(' * Acc@1 {top1.avg:.3f}'.format(top1=top1))
+        
         if test:
             tensor_writer.add_scalar('loss/test', loss.item(), epoch)
             tensor_writer.add_scalar('ACC@1/test', top1.avg, epoch)

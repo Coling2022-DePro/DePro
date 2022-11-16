@@ -16,9 +16,10 @@ from utilis.meters import AverageMeter, ProgressMeter
 
 from training.reweighting import weight_learner
 from transformers import get_linear_schedule_with_warmup
+from info_regularizer import train_mi_upper_estimator
 
 
-def train(train_loader, model, criterion, optimizer, epoch, args, tensor_writer=None):
+def train(train_loader, model, criterion, optimizer, epoch, args, tensor_writer=None, mi_upper_estimator=None, dow=None):
     ''' TODO write a dict to save previous featrues  check vqvae,
         the size of each feature is 512, os we need a tensor of 1024 * 512
         replace the last one every time
@@ -34,10 +35,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args, tensor_writer=
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
     top1 = AverageMeter('Acc@1', ':6.2f')
+    ub_loss = AverageMeter('ub_loss', ':6.2f')
 
     progress = ProgressMeter(
         len(train_loader),
-        [batch_time, data_time, losses, top1],
+        [batch_time, data_time, losses, top1, ub_loss],
         prefix="Epoch: [{}]".format(epoch))
 
     training_steps = (len(train_loader) - 1 / args.epochs + 1) * args.epochs
@@ -55,13 +57,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args, tensor_writer=
     for i, (input_ids, attention_masks, segment_ids, target) in enumerate(train_loader):
         data_time.update(time.time() - end)
 
+        upperbound_loss = 0.0
 
         input_ids = input_ids.cuda(args.gpu, non_blocking=True)
         attention_masks = attention_masks.cuda(args.gpu, non_blocking=True)
         segment_ids = segment_ids.cuda(args.gpu, non_blocking=True)
         target = target.cuda(args.gpu, non_blocking=True)
 
-        output, cfeatures = model(input_ids, attention_masks, segment_ids)
+        output, cfeatures, hidden_states = model(input_ids, attention_masks, segment_ids)
         pre_features = model.pre_features
         pre_weight1 = model.pre_weight1
 
@@ -75,9 +78,17 @@ def train(train_loader, model, criterion, optimizer, epoch, args, tensor_writer=
         model.pre_weight1.data.copy_(pre_weight1)
 
         loss = criterion(output, target).view(1, -1).mm(weight1).view(1)
-        acc1, acc5 = accuracy(output, target, topk=(1, 1))
+        
+        if mi_upper_estimator:
+            upper_bound = train_mi_upper_estimator(mi_upper_estimator, dow, hidden_states, attention_masks)
+            loss += upper_bound
+            upperbound_loss += upper_bound.item()
+
+
+        acc1, _ = accuracy(output, target, topk=(1, 1))
         losses.update(loss.item(), input_ids.size(0))
         top1.update(acc1[0], input_ids.size(0))
+        ub_loss.update(upperbound_loss, input_ids.size(0))
 
         optimizer.zero_grad()
         loss.backward()

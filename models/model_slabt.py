@@ -39,7 +39,8 @@ class AutoModelForSlabt(nn.Module):
         outputs = self.bert(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            token_type_ids=token_type_ids
+            token_type_ids=token_type_ids,
+            output_hidden_states=True
         )
 
         sequence_output = outputs[1]
@@ -47,4 +48,6 @@ class AutoModelForSlabt(nn.Module):
 
         x = self.fc1(flatten_features) # [bsz, classes_num]
 
-        return x, flatten_features
+        hidden_states = outputs[2]
+
+        return x, flatten_features, hidden_states

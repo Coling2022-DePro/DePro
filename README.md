@@ -64,9 +64,9 @@ Depro/
   |--saving.py             # saving models
   |--info_regularizer.py   # infoB regularizer of feature purification
 |--loss_reweighting.py     # RFF module of feature decorrelation
-|--main_feaDe.py           # running ablation experiment of feature decorrelation
-|--main_feaPu.py           # running ablation experiment of feature purification
-|--main.py                 # running main experiment
+|--info_regularizer.py     # feature decorrelation information bottleneck regularizer
+|--main_FeaDe.py           # running ablation experiment of feature decorrelation
+|--main_DePro.py           # running main experiment including feature decorrelation and feature purification
 ```
 
 
@@ -76,12 +76,14 @@ Depro/
 #### Feature Decorrelation
 
 ```bash
-python main_featDe.py
+python main_FeatDe.py
 ```
 
-#### Feature Purification
+#### Feature Decorrelation and Purification
 
-Soon
+```bash
+python main_DePro.py
+```
 
 ### Reference
 
